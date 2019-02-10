@@ -3,7 +3,6 @@
         "declaration": true,
         "moduleResolution": "node",
         "noImplicitAny": true,
-        "noUnusedLocals": true,
         "preserveConstEnums": true,
         "target": "es5",
         "module": "commonjs",

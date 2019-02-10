@@ -2,11 +2,16 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as fs from 'fs';
 import * as child_process from 'child_process';
+import { init} from './websocket';
 import 'source-map-support/register'
 
 const app = express()
 
-// declare function create(o: object | null): void;
+// you explicitly create the http server
+var server = require('http').createServer(app);
+init(server);
+server.listen(3000);
+
 
 interface Ticket {
   id?: number;
@@ -197,6 +202,6 @@ app.post('/clear', (req, res) => {
   res.sendStatus(200);
 })
 
-app.listen(3000);
+
 
 console.log('**ready**');
