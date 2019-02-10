@@ -2,7 +2,6 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as fs from 'fs';
 import * as child_process from 'child_process';
-import * as sys from 'sys';
 import 'source-map-support/register'
 
 const app = express()
@@ -58,7 +57,7 @@ app.use((req, res, next) => {
 app.post('/ticket', (req, res) => {
   const ticket: Ticket = req.body;
   console.log(req.body)
-  ticket.id = tickets.length;
+  ticket.id = tickets.length + 1;
   tickets.push(ticket);
   res.send(JSON.stringify({ 'ticketID': ticket.id }));
 })
@@ -86,8 +85,8 @@ app.get('/ticket', (req, res) => {
 
 });
 
-app.post('/boardingPass', (req, res) => {
-  const pass = boardingPasses.find((pass) => pass.ticketID == req.body.ticketID)
+app.get('/boardingpass', (req, res) => {
+  const pass = boardingPasses.find((pass) => pass.ticketID == req.query.id)
   if (!pass) {
     res.statusCode = 404;
     res.send(JSON.stringify({ 'Error': 'pass not found!' }));
@@ -96,14 +95,12 @@ app.post('/boardingPass', (req, res) => {
   res.send(pass);
 })
 
-app.get('/boarding', (req, res) => {
+app.post('/boarding', (req, res) => {
   //write the tickets to a json file
+
+
   const strTix = JSON.stringify(tickets);
-  fs.writeFile('passenger_List.json', strTix, 'utf8', (err) => {
-    if (err) {
-      console.log(err);
-    }
-  });
+  fs.writeFileSync('passenger_List.json', strTix, 'utf8');
 
   let numOfPriorityPeople = 0;
 
@@ -115,8 +112,8 @@ app.get('/boarding', (req, res) => {
 
   const steffenv6Args = ['steffenv6.py', '33', '5', numOfPriorityPeople.toString(), '0.75'];
   const manifestArgs = ['manifestlogic.py', 'passenger_List.json', 'seat_status.json', 'boarding_groups.json'];
-  let steffenRes = child_process.spawnSync("python", steffenv6Args);
-  let manifestRes = child_process.spawnSync("python", manifestArgs);
+  child_process.spawnSync("python", steffenv6Args);
+  child_process.spawnSync("python", manifestArgs);
 
   const seatAssignments: { passenger: number, number: string }[] = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
   console.log(seatAssignments);
@@ -134,6 +131,8 @@ app.get('/boarding', (req, res) => {
     if (!assignment) continue;
 
     for (let group in boardingGroups) {
+      if (group === 'bagged' || group === 'nobagged') continue;
+
       const groupSeats = boardingGroups[group];
       const seat = groupSeats.find(groupSeat => groupSeat === assignment.number);
       if (!seat) continue;
@@ -142,7 +141,7 @@ app.get('/boarding', (req, res) => {
         seatNumber: assignment.number,
         groupNumber: group,
         ticketID: ticket.id!,
-        id: boardingPasses.length
+        id: boardingPasses.length + 1
 
       }
 
@@ -160,11 +159,21 @@ app.get('/boarding', (req, res) => {
 
     }
   }
+
+  res.sendStatus(200);
 })
 
 app.post('/board', (req, res) => {
 
-  const pass = boardingStatuses.find((pass) => pass.pass.id == req.body.id)
+  if (req.body.id === '1000') {
+    res.sendStatus(200);
+    return;
+  }
+  parseInt(req.body.id)
+  const pass = boardingStatuses.find((pass) => {
+    console.log(pass.pass.id, parseInt(req.body.id))
+    return pass.pass.id == parseInt(req.body.id)
+  })
   if (!pass) {
     res.statusCode = 404;
     res.send(JSON.stringify({ 'Error': 'pass not found!' }));
@@ -185,7 +194,7 @@ app.post('/clear', (req, res) => {
   tickets.length = 0;
   boardingPasses.length = 0;
   boardingStatuses.length = 0;
-
+  res.sendStatus(200);
 })
 
 app.listen(3000);
