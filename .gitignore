@@ -1,8 +1,5 @@
 node_modules
 dist
 .DS_Store
-seat_status.json
-boarding_groups.json
 samples.json
-manifest.json
-passenger_List.json
+
