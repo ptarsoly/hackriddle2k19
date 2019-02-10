@@ -1,0 +1,25 @@
+{
+  "name": "hackriddle2k19",
+  "version": "1.0.0",
+  "description": "backend for airline boarding system",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -b -v",
+    "watch": "tsc -b -v -w",
+    "debug": "nodemon dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ptarsoly",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.16.1",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "source-map-support": "^0.5.10",
+    "typescript": "^3.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
+  }
+}
