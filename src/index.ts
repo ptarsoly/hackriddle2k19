@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as fs from 'fs';
 import * as child_process from 'child_process';
-import { init} from './websocket';
+import { init, boarded } from './websocket';
 import 'source-map-support/register'
 
 const app = express()
@@ -184,9 +184,14 @@ app.post('/board', (req, res) => {
     res.send(JSON.stringify({ 'Error': 'pass not found!' }));
     return;
   }
+  console.log('going to send');
+  const ticket = tickets.find(t => t.id == pass.pass.ticketID);
+  if (!ticket) return console.log('error');
 
+  boarded(pass.seat, ticket.bags !== '0')
   pass.boarded = true;
   console.log(boardingStatuses);
+
   res.sendStatus(200);
 
 })
